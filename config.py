@@ -1,7 +1,7 @@
 import os
 
 class Config:
-    # 数据库连接配置
+    # 获取数据库URL
     database_url = os.environ.get('DATABASE_URL')
     
     # 修复 Railway 的 postgres:// 为 postgresql://
@@ -11,11 +11,8 @@ class Config:
         SQLALCHEMY_DATABASE_URI = database_url
     else:
         # 本地开发使用 SQLite
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///cpims.db'
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'instance', 'cpims.db')
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 300,
-    }
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev_secret_key_change_in_production')
