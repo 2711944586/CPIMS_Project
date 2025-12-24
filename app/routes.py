@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from sqlalchemy import func
+from sqlalchemy import func, text
 from datetime import datetime
 from .models import db, Product, Sale, BrowseLog, User
 
@@ -56,7 +56,6 @@ def dashboard():
     
     # 图表数据3：月度销售趋势（折线图）
     # PostgreSQL 使用 to_char，SQLite 使用 strftime
-    from sqlalchemy import text
     if 'postgresql' in str(db.engine.url):
         # PostgreSQL
         monthly_sales = db.session.query(
