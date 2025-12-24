@@ -91,6 +91,4 @@ CPIMS_Project/
 - 技术栈：Flask + SQLAlchemy + Bootstrap 5
 - 数据库：SQLite（开发）/ PostgreSQL（生产）
 
-## 许可证
 
-MIT License
