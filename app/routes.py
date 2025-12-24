@@ -28,10 +28,19 @@ def dashboard():
     total_users = User.query.count()
     
     # 图表数据1：每日用户浏览次数分布直方图
-    daily_logs = db.session.query(
-        func.date(BrowseLog.browse_time).label('date'),
-        func.count(BrowseLog.id).label('cnt')
-    ).group_by('date').order_by('date').limit(30).all()
+    # PostgreSQL 和 SQLite 的日期处理
+    if 'postgresql' in str(db.engine.url):
+        # PostgreSQL: 使用 CAST 或 DATE()
+        daily_logs = db.session.query(
+            func.cast(BrowseLog.browse_time, db.Date).label('date'),
+            func.count(BrowseLog.id).label('cnt')
+        ).group_by(text('date')).order_by(text('date')).limit(30).all()
+    else:
+        # SQLite
+        daily_logs = db.session.query(
+            func.date(BrowseLog.browse_time).label('date'),
+            func.count(BrowseLog.id).label('cnt')
+        ).group_by('date').order_by('date').limit(30).all()
     
     chart_dates = [str(item.date) for item in daily_logs]
     chart_counts = [item.cnt for item in daily_logs]
@@ -46,12 +55,24 @@ def dashboard():
     category_amounts = [float(item.amount) for item in category_sales]
     
     # 图表数据3：月度销售趋势（折线图）
-    monthly_sales = db.session.query(
-        func.strftime('%Y-%m', Sale.sale_date).label('month'),
-        func.sum(Sale.total_amount).label('amount'),
-        func.sum(Sale.quantity).label('qty')
-    ).filter(func.extract('year', Sale.sale_date) == current_year)\
-     .group_by('month').order_by('month').all()
+    # PostgreSQL 使用 to_char，SQLite 使用 strftime
+    from sqlalchemy import text
+    if 'postgresql' in str(db.engine.url):
+        # PostgreSQL
+        monthly_sales = db.session.query(
+            func.to_char(Sale.sale_date, 'YYYY-MM').label('month'),
+            func.sum(Sale.total_amount).label('amount'),
+            func.sum(Sale.quantity).label('qty')
+        ).filter(func.extract('year', Sale.sale_date) == current_year)\
+         .group_by(text('month')).order_by(text('month')).all()
+    else:
+        # SQLite
+        monthly_sales = db.session.query(
+            func.strftime('%Y-%m', Sale.sale_date).label('month'),
+            func.sum(Sale.total_amount).label('amount'),
+            func.sum(Sale.quantity).label('qty')
+        ).filter(func.extract('year', Sale.sale_date) == current_year)\
+         .group_by('month').order_by('month').all()
     
     month_labels = [item.month for item in monthly_sales]
     month_amounts = [float(item.amount) for item in monthly_sales]
