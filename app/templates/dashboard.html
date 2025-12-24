@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+
+{% block title %}数据大屏 - 商品信息管理系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+        height: 100%;
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .chart-title i {
+        color: #6366f1;
+    }
+    
+    .chart-container {
+        height: 280px;
+    }
+    
+    .chart-container-lg {
+        height: 350px;
+    }
+    
+    .insight-box {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.8rem;
+        border-left: 4px solid #6366f1;
+    }
+    
+    .insight-label {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .insight-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+    
+    .warning-banner {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .warning-banner h5 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 页面标题 -->
+    <div class="dashboard-header fade-in">
+        <h2 class="page-title">
+            <i class="bi bi-speedometer2"></i> 数据分析大屏
+        </h2>
+        <p class="text-white mt-2 mb-0" style="opacity: 0.9;">实时监控业务数据，洞察商业趋势</p>
+    </div>
+    
+    <!-- 核心指标 -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card fade-in">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                        <i class="bi bi-currency-yen"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="stat-label">今年销售总额</div>
+                        <div class="stat-value" style="color: #10b981;">¥{{ total_sales }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card fade-in" style="animation-delay: 0.1s;">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="stat-label">销售商品数</div>
+                        <div class="stat-value" style="color: #3b82f6;">{{ total_qty }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card fade-in" style="animation-delay: 0.2s;">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="stat-label">商品总数</div>
+                        <div class="stat-value" style="color: #8b5cf6;">{{ total_products }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card fade-in" style="animation-delay: 0.3s;">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #db2777); color: white;">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="stat-label">用户总数</div>
+                        <div class="stat-value" style="color: #ec4899;">{{ total_users }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图表区域 -->
+    <div class="row g-3">
+        <!-- 月度销售趋势 -->
+        <div class="col-lg-8">
+            <div class="chart-card fade-in" style="animation-delay: 0.4s;">
+                <div class="chart-title">
+                    <i class="bi bi-graph-up-arrow"></i> 月度销售趋势
+                </div>
+                <div class="chart-container-lg">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 品类分布 -->
+        <div class="col-lg-4">
+            <div class="chart-card fade-in" style="animation-delay: 0.5s;">
+                <div class="chart-title">
+                    <i class="bi bi-pie-chart"></i> 品类销售分布
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 每日浏览 -->
+        <div class="col-lg-6">
+            <div class="chart-card fade-in" style="animation-delay: 0.6s;">
+                <div class="chart-title">
+                    <i class="bi bi-bar-chart-line"></i> 每日浏览趋势
+                </div>
+                <div class="chart-container">
+                    <canvas id="browseChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 热门商品 -->
+        <div class="col-lg-6">
+            <div class="chart-card fade-in" style="animation-delay: 0.7s;">
+                <div class="chart-title">
+                    <i class="bi bi-trophy"></i> 热门商品 TOP10
+                </div>
+                <div class="chart-container">
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 平台分布 -->
+        <div class="col-lg-4">
+            <div class="chart-card fade-in" style="animation-delay: 0.8s;">
+                <div class="chart-title">
+                    <i class="bi bi-device-hdd"></i> 浏览平台分布
+                </div>
+                <div class="chart-container">
+                    <canvas id="platformChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 数据洞察 -->
+        <div class="col-lg-8">
+            <div class="chart-card fade-in" style="animation-delay: 0.9s;">
+                <div class="chart-title">
+                    <i class="bi bi-lightbulb"></i> 数据洞察
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="insight-box">
+                            <div class="insight-label">平均订单金额</div>
+                            <div class="insight-value">¥{{ "%.0f"|format(total_sales|float / total_qty if total_qty > 0 else 0) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="insight-box">
+                            <div class="insight-label">人均购买量</div>
+                            <div class="insight-value">{{ "%.1f"|format(total_qty / total_users if total_users > 0 else 0) }}件</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="insight-box">
+                            <div class="insight-label">浏览转化率</div>
+                            <div class="insight-value">{{ "%.1f"|format((total_qty / (chart_counts|sum if chart_counts|sum > 0 else 1)) * 100) }}%</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="insight-box">
+                            <div class="insight-label">商品周转率</div>
+                            <div class="insight-value">{{ "%.1f"|format(total_qty / total_products if total_products > 0 else 0) }}次</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 库存预警 -->
+    {% if low_stock_count > 0 %}
+    <div class="warning-banner fade-in" style="animation-delay: 1s;">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill fs-1 me-3"></i>
+            <div class="flex-grow-1">
+                <h5><i class="bi bi-bell"></i> 库存预警</h5>
+                <p class="mb-0">当前有 <strong>{{ low_stock_count }}</strong> 个商品库存低于10件，请及时补货！</p>
+            </div>
+            <a href="{{ url_for('main.products_manage') }}" class="btn btn-light">
+                <i class="bi bi-arrow-right"></i> 查看详情
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const colors = {
+        primary: '#6366f1',
+        secondary: '#8b5cf6',
+        success: '#10b981',
+        danger: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6',
+        pink: '#ec4899',
+        cyan: '#06b6d4'
+    };
+    
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    font: { family: 'Inter', size: 12, weight: '600' },
+                    padding: 15
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                padding: 12,
+                titleFont: { family: 'Inter', size: 13, weight: '700' },
+                bodyFont: { family: 'Inter', size: 12 },
+                cornerRadius: 8
+            }
+        }
+    };
+
+    // 1. 月度销售趋势
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: {{ month_labels | tojson }},
+            datasets: [{
+                label: '销售金额 (¥)',
+                data: {{ month_amounts | tojson }},
+                borderColor: colors.primary,
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: colors.primary,
+                yAxisID: 'y'
+            }, {
+                label: '销售数量',
+                data: {{ month_quantities | tojson }},
+                borderColor: colors.success,
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: colors.success,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            ...chartOptions,
+            scales: {
+                y: {
+                    position: 'left',
+                    beginAtZero: true,
+                    ticks: {
+                        callback: v => '¥' + v.toLocaleString(),
+                        font: { family: 'Inter', size: 11 }
+                    },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                y1: {
+                    position: 'right',
+                    beginAtZero: true,
+                    ticks: { font: { family: 'Inter', size: 11 } },
+                    grid: { display: false }
+                },
+                x: {
+                    ticks: { font: { family: 'Inter', size: 11 } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // 2. 品类分布
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_labels | tojson }},
+            datasets: [{
+                data: {{ category_amounts | tojson }},
+                backgroundColor: [colors.primary, colors.secondary, colors.pink, colors.warning, colors.success, colors.info, colors.danger, colors.cyan],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            ...chartOptions,
+            cutout: '60%',
+            plugins: {
+                ...chartOptions.plugins,
+                legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 }, padding: 10 } }
+            }
+        }
+    });
+
+    // 3. 每日浏览
+    new Chart(document.getElementById('browseChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_dates | tojson }},
+            datasets: [{
+                label: '浏览次数',
+                data: {{ chart_counts | tojson }},
+                backgroundColor: colors.secondary,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            ...chartOptions,
+            plugins: { ...chartOptions.plugins, legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { ticks: { font: { family: 'Inter', size: 10 }, maxRotation: 45 }, grid: { display: false } }
+            }
+        }
+    });
+
+    // 4. 热门商品
+    new Chart(document.getElementById('topProductsChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ top_product_names | tojson }},
+            datasets: [{
+                label: '销量',
+                data: {{ top_product_sales | tojson }},
+                backgroundColor: [colors.primary, colors.secondary, colors.pink, colors.warning, colors.success, colors.info, colors.danger, colors.cyan, '#64748b', '#475569'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            ...chartOptions,
+            indexAxis: 'y',
+            plugins: { ...chartOptions.plugins, legend: { display: false } },
+            scales: {
+                x: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                y: { ticks: { font: { family: 'Inter', size: 10 } }, grid: { display: false } }
+            }
+        }
+    });
+
+    // 5. 平台分布
+    new Chart(document.getElementById('platformChart'), {
+        type: 'polarArea',
+        data: {
+            labels: {{ platform_labels | tojson }},
+            datasets: [{
+                data: {{ platform_counts | tojson }},
+                backgroundColor: ['rgba(99,102,241,0.7)', 'rgba(139,92,246,0.7)', 'rgba(236,72,153,0.7)', 'rgba(245,158,11,0.7)'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            ...chartOptions,
+            plugins: { ...chartOptions.plugins, legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 }, padding: 10 } } }
+        }
+    });
+</script>
+{% endblock %}

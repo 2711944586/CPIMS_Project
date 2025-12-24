@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品信息管理系统 - 欢迎</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 动态背景 */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(138, 92, 246, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(99, 102, 241, 0.3) 0%, transparent 50%);
+            animation: backgroundMove 15s ease-in-out infinite;
+        }
+        
+        @keyframes backgroundMove {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+        
+        .cover-container {
+            text-align: center;
+            color: white;
+            z-index: 10;
+            animation: fadeInUp 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 900px;
+            padding: 0 2rem;
+        }
+        
+        .system-icon {
+            font-size: 6rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .system-title {
+            font-size: 4.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            letter-spacing: -2px;
+            line-height: 1.1;
+        }
+        
+        .system-title-gradient {
+            background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
+        .system-subtitle {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 3rem;
+            opacity: 0.95;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 28px;
+            padding: 3rem;
+            margin: 3rem auto;
+            max-width: 700px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            50%, 100% { left: 100%; }
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+            font-size: 1.15rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-item i {
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        
+        .enter-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 1.3rem 4rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
+        
+        .enter-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .enter-btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+        
+        .enter-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            color: white;
+        }
+        
+        .enter-btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .enter-btn i {
+            margin-left: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .enter-btn:hover i {
+            transform: translateX(5px);
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            animation: float-shape 20s infinite ease-in-out;
+        }
+        
+        .shape:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            left: 10%;
+            top: 20%;
+            animation-delay: 0s;
+            animation-duration: 18s;
+        }
+        
+        .shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            right: 15%;
+            top: 30%;
+            animation-delay: 2s;
+            animation-duration: 22s;
+        }
+        
+        .shape:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            left: 20%;
+            bottom: 20%;
+            animation-delay: 4s;
+            animation-duration: 20s;
+        }
+        
+        .shape:nth-child(4) {
+            width: 120px;
+            height: 120px;
+            right: 10%;
+            bottom: 30%;
+            animation-delay: 6s;
+            animation-duration: 24s;
+        }
+        
+        .shape:nth-child(5) {
+            width: 90px;
+            height: 90px;
+            left: 50%;
+            top: 10%;
+            animation-delay: 3s;
+            animation-duration: 19s;
+        }
+        
+        @keyframes float-shape {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            33% {
+                transform: translateY(-40px) rotate(120deg) scale(1.1);
+            }
+            66% {
+                transform: translateY(-20px) rotate(240deg) scale(0.9);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            margin: 0.3rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .tech-stack {
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .system-title {
+                font-size: 3rem;
+            }
+            .system-subtitle {
+                font-size: 1rem;
+            }
+            .info-card {
+                padding: 2rem;
+            }
+            .enter-btn {
+                padding: 1rem 3rem;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    
+    <div class="cover-container">
+        <div class="system-icon">
+            <i class="bi bi-shop-window"></i>
+        </div>
+        
+        <h1 class="system-title">
+            <span class="system-title-gradient">商品信息管理系统</span>
+        </h1>
+        
+        <p class="system-subtitle">
+            Company Product Information Management System
+        </p>
+        
+        <div class="info-card">
+            <div class="info-item">
+                <i class="bi bi-person-badge-fill"></i>
+                <span>设计开发：[庄颂] [20241334]</span>
+            </div>
+            <div class="info-item">
+                <i class="bi bi-mortarboard-fill"></i>
+                <span>班级：[信息2402班]</span>
+            </div>
+            <div class="info-item">
+                <i class="bi bi-calendar-event-fill"></i>
+                <span>开发时间：2025年12月</span>
+            </div>
+            
+            <div class="tech-stack">
+                <span class="tech-badge"><i class="bi bi-code-slash"></i> Flask</span>
+                <span class="tech-badge"><i class="bi bi-database"></i> SQLAlchemy</span>
+                <span class="tech-badge"><i class="bi bi-bootstrap"></i> Bootstrap 5</span>
+                <span class="tech-badge"><i class="bi bi-bar-chart"></i> Chart.js</span>
+            </div>
+        </div>
+        
+        <button class="enter-btn" onclick="window.location.href='{{ url_for('main.dashboard') }}'">
+            <span>进入系统<i class="bi bi-arrow-right-circle-fill"></i></span>
+        </button>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
