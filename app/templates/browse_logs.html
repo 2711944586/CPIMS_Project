@@ -1,135 +1,86 @@
 {% extends "base.html" %}
-
 {% block title %}浏览记录 - CPIMS{% endblock %}
 
 {% block content %}
-<div class="top-header">
-    <div class="page-title-section">
+<div class="header">
+    <div class="header-title">
         <h1>浏览记录</h1>
-        <p>查询用户浏览行为数据</p>
+        <p>用户浏览行为数据</p>
     </div>
 </div>
 
-<div class="content-area">
-    <!-- 搜索 -->
+<div class="content">
     <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ url_for('main.browse_logs') }}">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label">用户名</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person"></i></span>
-                            <input type="text" class="form-control" name="username" value="{{ username }}" placeholder="输入用户名...">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">开始日期</label>
-                        <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">结束日期</label>
-                        <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search me-1"></i> 查询
-                        </button>
-                    </div>
+        <div class="card-body py-3">
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-control" name="username" value="{{ username }}" placeholder="搜索用户...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">开始日期</label>
+                    <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">结束日期</label>
+                    <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">查询</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- 统计 -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(79,70,229,0.1); color: var(--primary);">
-                    <i class="bi bi-eye"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">浏览记录</div>
-                    <div class="stat-value">{{ logs|length }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(34,197,94,0.1); color: var(--success);">
-                    <i class="bi bi-people"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">活跃用户</div>
-                    <div class="stat-value">{{ logs|groupby('user_id')|list|length }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: var(--warning);">
-                    <i class="bi bi-box"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">浏览商品</div>
-                    <div class="stat-value">{{ logs|groupby('product_id')|list|length }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 表格 -->
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-check"></i> 浏览明细</span>
-            <span class="badge badge-soft-primary">{{ logs|length }} 条记录</span>
+        <div class="card-header">
+            <span><i class="bi bi-list-check"></i>浏览明细</span>
+            <span class="badge badge-default">{{ total_count }} 条</span>
         </div>
         <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>记录ID</th>
+                        <th>ID</th>
                         <th>用户</th>
-                        <th>商品名称</th>
+                        <th>商品</th>
                         <th>浏览时间</th>
-                        <th>访问渠道</th>
+                        <th>渠道</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for log in logs %}
                     <tr>
-                        <td><span style="color: var(--gray-400);">#</span>{{ log.id }}</td>
+                        <td style="color: var(--text-muted);">#{{ log.id }}</td>
+                        <td>{{ log.user.username }}</td>
+                        <td style="color: var(--text); font-weight: 500;">{{ log.product.name }}</td>
+                        <td style="color: var(--text-muted);">{{ log.browse_time.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td>
-                            <i class="bi bi-person-circle text-muted me-1"></i>{{ log.user.username }}
-                        </td>
-                        <td><strong>{{ log.product.name }}</strong></td>
-                        <td style="color: var(--gray-500); font-size: 0.85rem;">
-                            <i class="bi bi-clock me-1"></i>{{ log.browse_time.strftime('%Y-%m-%d %H:%M') }}
-                        </td>
-                        <td>
-                            {% if log.platform == 'PC' %}
-                            <span class="badge" style="background: #e8f4fd; color: #1677ff;">
-                                <i class="bi bi-laptop me-1"></i>PC端
-                            </span>
-                            {% elif log.platform == 'APP' %}
-                            <span class="badge" style="background: #f3e8ff; color: #9333ea;">
-                                <i class="bi bi-phone me-1"></i>APP
-                            </span>
-                            {% elif log.platform == '移动端' %}
-                            <span class="badge" style="background: #e6f7e6; color: #52c41a;">
-                                <i class="bi bi-phone me-1"></i>移动端
-                            </span>
-                            {% else %}
-                            <span class="badge badge-soft-warning">
-                                <i class="bi bi-globe me-1"></i>{{ log.platform }}
-                            </span>
-                            {% endif %}
+                            {% if log.platform == 'PC' %}<span class="badge badge-default">PC</span>
+                            {% elif log.platform == 'APP' %}<span class="badge badge-primary">APP</span>
+                            {% else %}<span class="badge badge-success">{{ log.platform }}</span>{% endif %}
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if pagination.pages > 1 %}
+        <div class="card-body border-top">
+            <nav><ul class="pagination pagination-sm mb-0 justify-content-center">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.browse_logs', page=pagination.prev_num, username=username, start_date=start_date, end_date=end_date) }}">上一页</a>
+                </li>
+                {% for p in pagination.iter_pages() %}
+                    {% if p %}<li class="page-item {% if p == pagination.page %}active{% endif %}"><a class="page-link" href="{{ url_for('main.browse_logs', page=p, username=username, start_date=start_date, end_date=end_date) }}">{{ p }}</a></li>
+                    {% else %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+                {% endfor %}
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.browse_logs', page=pagination.next_num, username=username, start_date=start_date, end_date=end_date) }}">下一页</a>
+                </li>
+            </ul></nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

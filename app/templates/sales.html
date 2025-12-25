@@ -1,134 +1,103 @@
 {% extends "base.html" %}
-
 {% block title %}销售记录 - CPIMS{% endblock %}
 
 {% block content %}
-<div class="top-header">
-    <div class="page-title-section">
+<div class="header">
+    <div class="header-title">
         <h1>销售记录</h1>
-        <p>查询和分析销售数据</p>
+        <p>查询销售数据</p>
     </div>
 </div>
 
-<div class="content-area">
-    <!-- 搜索 -->
+<div class="content">
     <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ url_for('main.sales_query') }}">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-9">
-                        <label class="form-label">按商品名称搜索</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control" name="param_keyword" value="{{ keyword }}" placeholder="输入商品名称...">
-                        </div>
+        <div class="card-body py-3">
+            <form method="GET" class="row g-2 align-items-end">
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" name="param_keyword" value="{{ keyword }}" placeholder="搜索商品名称...">
                     </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search me-1"></i> 查询
-                        </button>
-                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">查询</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- 统计 -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(79,70,229,0.1); color: var(--primary);">
-                    <i class="bi bi-receipt"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">订单数</div>
-                    <div class="stat-value">{{ sales|length }}</div>
-                </div>
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-label">订单数</div>
+                <div class="metric-value">{{ total_count }}</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(34,197,94,0.1); color: var(--success);">
-                    <i class="bi bi-currency-yen"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">销售总额</div>
-                    <div class="stat-value">¥{{ "%.0f"|format(sales|sum(attribute='total_amount')) }}</div>
-                </div>
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-label">销售总额</div>
+                <div class="metric-value success">¥{{ "%.0f"|format(total_amount) }}</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(14,165,233,0.1); color: var(--secondary);">
-                    <i class="bi bi-box"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">商品数量</div>
-                    <div class="stat-value">{{ sales|sum(attribute='quantity') }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: var(--warning);">
-                    <i class="bi bi-calculator"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-label">平均订单</div>
-                    <div class="stat-value">¥{{ "%.0f"|format((sales|sum(attribute='total_amount')) / (sales|length) if sales|length > 0 else 0) }}</div>
-                </div>
+        <div class="col-md-4">
+            <div class="metric-card">
+                <div class="metric-label">商品数量</div>
+                <div class="metric-value">{{ total_qty }}</div>
             </div>
         </div>
     </div>
 
-    <!-- 表格 -->
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-table"></i> 销售明细</span>
-            <span class="badge badge-soft-primary">{{ sales|length }} 条记录</span>
+        <div class="card-header">
+            <span><i class="bi bi-table"></i>销售明细</span>
+            <span class="badge badge-default">{{ pagination.total }} 条</span>
         </div>
         <div class="table-responsive">
             <table class="table">
                 <thead>
                     <tr>
                         <th>订单号</th>
-                        <th>商品名称</th>
+                        <th>商品</th>
                         <th>用户</th>
                         <th>日期</th>
                         <th>单价</th>
                         <th>数量</th>
-                        <th>总金额</th>
+                        <th>金额</th>
                         <th>支付方式</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for s in sales %}
                     <tr>
-                        <td><span style="color: var(--gray-400);">#</span>{{ s.id }}</td>
-                        <td><strong>{{ s.product.name }}</strong></td>
-                        <td>
-                            <i class="bi bi-person-circle text-muted me-1"></i>{{ s.user.username }}
-                        </td>
-                        <td style="color: var(--gray-500); font-size: 0.85rem;">{{ s.sale_date.strftime('%Y-%m-%d') }}</td>
+                        <td style="color: var(--text-muted);">#{{ s.id }}</td>
+                        <td style="color: var(--text); font-weight: 500;">{{ s.product.name }}</td>
+                        <td>{{ s.user.username }}</td>
+                        <td style="color: var(--text-muted);">{{ s.sale_date.strftime('%Y-%m-%d') }}</td>
                         <td>¥{{ "%.2f"|format(s.unit_price) }}</td>
-                        <td><span class="badge badge-soft-primary">{{ s.quantity }}</span></td>
+                        <td><span class="badge badge-default">{{ s.quantity }}</span></td>
                         <td style="color: var(--success); font-weight: 600;">¥{{ "%.2f"|format(s.total_amount) }}</td>
-                        <td>
-                            {% if s.payment_method == '支付宝' %}
-                            <span class="badge" style="background: #e8f4fd; color: #1677ff;">{{ s.payment_method }}</span>
-                            {% elif s.payment_method == '微信支付' %}
-                            <span class="badge" style="background: #e6f7e6; color: #52c41a;">{{ s.payment_method }}</span>
-                            {% elif s.payment_method == '银行卡' or s.payment_method == '信用卡' %}
-                            <span class="badge" style="background: #fff7e6; color: #fa8c16;">{{ s.payment_method }}</span>
-                            {% else %}
-                            <span class="badge badge-soft-primary">{{ s.payment_method }}</span>
-                            {% endif %}
-                        </td>
+                        <td><span class="badge badge-primary">{{ s.payment_method }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if pagination.pages > 1 %}
+        <div class="card-body border-top">
+            <nav><ul class="pagination pagination-sm mb-0 justify-content-center">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.sales_query', page=pagination.prev_num, param_keyword=keyword) }}">上一页</a>
+                </li>
+                {% for p in pagination.iter_pages() %}
+                    {% if p %}<li class="page-item {% if p == pagination.page %}active{% endif %}"><a class="page-link" href="{{ url_for('main.sales_query', page=p, param_keyword=keyword) }}">{{ p }}</a></li>
+                    {% else %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+                {% endfor %}
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.sales_query', page=pagination.next_num, param_keyword=keyword) }}">下一页</a>
+                </li>
+            </ul></nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
