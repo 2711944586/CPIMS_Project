@@ -3,34 +3,34 @@
 
 {% block content %}
 <div class="header">
-    <div class="header-title">
+    <div class="d-flex align-items-center">
         <h1>数据看板</h1>
-        <p>业务数据概览与分析</p>
+        <span class="header-sub">业务数据概览</span>
     </div>
 </div>
 
 <div class="content">
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
-            <div class="metric-card">
+            <div class="metric">
                 <div class="metric-label">年度销售额</div>
-                <div class="metric-value success">¥{{ total_sales }}</div>
+                <div class="metric-value green">¥{{ total_sales }}</div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="metric-card">
+            <div class="metric">
                 <div class="metric-label">销售数量</div>
                 <div class="metric-value">{{ total_qty }}</div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="metric-card">
+            <div class="metric">
                 <div class="metric-label">商品总数</div>
                 <div class="metric-value">{{ total_products }}</div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="metric-card">
+            <div class="metric">
                 <div class="metric-label">注册用户</div>
                 <div class="metric-value">{{ total_users }}</div>
             </div>
@@ -41,45 +41,36 @@
         <div class="col-lg-8">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-graph-up"></i>月度销售趋势</div>
-                <div class="card-body">
-                    <div class="chart-container-lg"><canvas id="monthlyChart"></canvas></div>
-                </div>
+                <div class="card-body"><div class="chart-wrap-lg"><canvas id="monthlyChart"></canvas></div></div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-pie-chart"></i>品类分布</div>
-                <div class="card-body">
-                    <div class="chart-container"><canvas id="categoryChart"></canvas></div>
-                </div>
+                <div class="card-body"><div class="chart-wrap"><canvas id="categoryChart"></canvas></div></div>
             </div>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
+    <div class="row g-3">
         <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-bar-chart"></i>每日浏览量</div>
-                <div class="card-body">
-                    <div class="chart-container"><canvas id="browseChart"></canvas></div>
-                </div>
+                <div class="card-body"><div class="chart-wrap"><canvas id="browseChart"></canvas></div></div>
             </div>
         </div>
         <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-trophy"></i>热销商品 TOP10</div>
-                <div class="card-body">
-                    <div class="chart-container"><canvas id="topChart"></canvas></div>
-                </div>
+                <div class="card-body"><div class="chart-wrap"><canvas id="topChart"></canvas></div></div>
             </div>
         </div>
     </div>
 
     {% if low_stock_count > 0 %}
-    <div class="alert" style="background: rgba(250,173,20,0.1); border-left: 3px solid var(--warning);">
-        <strong style="color: #d48806;">库存预警</strong>
-        <span style="color: var(--text-secondary); margin-left: 8px;">{{ low_stock_count }} 个商品库存不足</span>
-        <a href="{{ url_for('main.products_manage') }}" class="btn btn-sm btn-light float-end">查看</a>
+    <div class="alert mt-4" style="background: rgba(250,176,5,0.1); border-left: 3px solid var(--warning); display: flex; align-items: center; justify-content: space-between;">
+        <div><strong style="color: #e67700;">库存预警</strong><span class="text-muted ms-2">{{ low_stock_count }} 个商品库存不足</span></div>
+        <a href="{{ url_for('main.products_manage') }}" class="btn btn-sm btn-light">查看详情</a>
     </div>
     {% endif %}
 </div>
@@ -87,11 +78,9 @@
 
 {% block extra_js %}
 <script>
-Chart.defaults.font.family = 'Inter';
+Chart.defaults.font.family = 'Inter, sans-serif';
 Chart.defaults.font.size = 11;
-Chart.defaults.color = '#999';
-
-const colors = { primary: '#1a1a1a', accent: '#0066ff', success: '#00a854', muted: '#e8e8e8' };
+Chart.defaults.color = '#868e96';
 
 new Chart(document.getElementById('monthlyChart'), {
     type: 'line',
@@ -100,22 +89,22 @@ new Chart(document.getElementById('monthlyChart'), {
         datasets: [{
             label: '销售额',
             data: {{ month_amounts | tojson }},
-            borderColor: colors.primary,
-            backgroundColor: 'rgba(26,26,26,0.03)',
+            borderColor: '#212529',
+            backgroundColor: 'rgba(33,37,41,0.04)',
             borderWidth: 2,
             fill: true,
-            tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: '#fff',
-            pointBorderWidth: 2
+            tension: 0.35,
+            pointRadius: 0,
+            pointHoverRadius: 4
         }]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
         plugins: { legend: { display: false } },
         scales: {
-            y: { beginAtZero: true, grid: { color: '#f5f5f5' }, ticks: { callback: v => '¥' + (v/1000).toFixed(0) + 'k' } },
+            y: { beginAtZero: true, grid: { color: '#f1f3f4', drawBorder: false }, ticks: { callback: v => '¥' + (v/1000).toFixed(0) + 'k' } },
             x: { grid: { display: false } }
         }
     }
@@ -125,27 +114,27 @@ new Chart(document.getElementById('categoryChart'), {
     type: 'doughnut',
     data: {
         labels: {{ category_labels | tojson }},
-        datasets: [{ data: {{ category_amounts | tojson }}, backgroundColor: ['#1a1a1a','#404040','#666','#888','#aaa','#ccc','#e0e0e0','#f0f0f0'], borderWidth: 0 }]
+        datasets: [{ data: {{ category_amounts | tojson }}, backgroundColor: ['#212529','#495057','#868e96','#adb5bd','#ced4da','#dee2e6','#e9ecef','#f8f9fa'], borderWidth: 0 }]
     },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, font: { size: 10 } } } } }
+    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { padding: 10, usePointStyle: true, font: { size: 10 } } } } }
 });
 
 new Chart(document.getElementById('browseChart'), {
     type: 'bar',
     data: {
         labels: {{ chart_dates | tojson }},
-        datasets: [{ data: {{ chart_counts | tojson }}, backgroundColor: colors.primary, borderRadius: 4, barThickness: 12 }]
+        datasets: [{ data: {{ chart_counts | tojson }}, backgroundColor: '#212529', borderRadius: 3, barThickness: 14 }]
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f5f5f5' } }, x: { grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f3f4', drawBorder: false } }, x: { grid: { display: false } } } }
 });
 
 new Chart(document.getElementById('topChart'), {
     type: 'bar',
     data: {
         labels: {{ top_product_names | tojson }},
-        datasets: [{ data: {{ top_product_sales | tojson }}, backgroundColor: colors.primary, borderRadius: 4, barThickness: 14 }]
+        datasets: [{ data: {{ top_product_sales | tojson }}, backgroundColor: '#212529', borderRadius: 3, barThickness: 16 }]
     },
-    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: '#f5f5f5' } }, y: { grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: '#f1f3f4', drawBorder: false } }, y: { grid: { display: false } } } }
 });
 </script>
 {% endblock %}

@@ -83,8 +83,8 @@
             </table>
         </div>
         {% if pagination.pages > 1 %}
-        <div class="card-body border-top">
-            <nav><ul class="pagination pagination-sm mb-0 justify-content-center">
+        <div class="pagination-wrap">
+            <nav><ul class="pagination pagination-sm mb-0">
                 <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
                     <a class="page-link" href="{{ url_for('main.sales_query', page=pagination.prev_num, param_keyword=keyword) }}">上一页</a>
                 </li>
@@ -96,7 +96,28 @@
                     <a class="page-link" href="{{ url_for('main.sales_query', page=pagination.next_num, param_keyword=keyword) }}">下一页</a>
                 </li>
             </ul></nav>
+            <div class="page-jump">
+                <span>跳至</span>
+                <input type="number" id="pageInput" min="1" max="{{ pagination.pages }}" value="{{ pagination.page }}">
+                <span>/ {{ pagination.pages }} 页</span>
+                <button onclick="jumpToPage()">跳转</button>
+            </div>
         </div>
+        <script>
+        function jumpToPage() {
+            var page = parseInt(document.getElementById('pageInput').value);
+            var maxPage = {{ pagination.pages }};
+            if (page >= 1 && page <= maxPage) {
+                var keyword = '{{ keyword }}';
+                var url = '{{ url_for("main.sales_query") }}?page=' + page;
+                if (keyword) url += '&param_keyword=' + encodeURIComponent(keyword);
+                window.location.href = url;
+            }
+        }
+        document.getElementById('pageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') jumpToPage();
+        });
+        </script>
         {% endif %}
     </div>
 </div>
