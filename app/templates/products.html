@@ -1,127 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}商品管理 - 商品信息管理系统{% endblock %}
-
-{% block extra_css %}
-<style>
-    .page-header {
-        margin-bottom: 1.5rem;
-    }
-    
-    .stock-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }
-    
-    .stock-low {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-    
-    .stock-medium {
-        background: #fef3c7;
-        color: #d97706;
-    }
-    
-    .stock-high {
-        background: #d1fae5;
-        color: #059669;
-    }
-    
-    .price-text {
-        color: #10b981;
-        font-weight: 700;
-    }
-    
-    .category-badge {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        color: white;
-        padding: 0.4rem 0.8rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-    }
-</style>
-{% endblock %}
+{% block title %}商品管理 - CPIMS{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- 页面头部 -->
-    <div class="page-header fade-in">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="page-title">
-                    <i class="bi bi-box-seam"></i> 商品管理
-                </h2>
-                <p class="text-white mt-2 mb-0" style="opacity: 0.9;">管理商品库存，添加或编辑商品信息</p>
-            </div>
-            <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#productModal" onclick="clearForm()">
-                <i class="bi bi-plus-circle"></i> 添加商品
-            </button>
-        </div>
+<div class="top-header">
+    <div class="page-title-section">
+        <h1>商品管理</h1>
+        <p>管理商品信息，添加或编辑商品数据</p>
     </div>
-    
-    <!-- 商品列表 -->
-    <div class="card fade-in" style="animation-delay: 0.1s;">
-        <div class="card-header">
-            <i class="bi bi-list-ul"></i> 商品清单
-            <span class="badge bg-white text-primary ms-2">{{ products|length }} 件</span>
+    <div class="header-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal" onclick="clearForm()">
+            <i class="bi bi-plus-lg me-1"></i> 添加商品
+        </button>
+    </div>
+</div>
+
+<div class="content-area">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-ul"></i> 商品列表</span>
+            <span class="badge badge-soft-primary">共 {{ products|length }} 件</span>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>编号</th>
-                            <th>商品名称</th>
-                            <th>品类</th>
-                            <th>型号</th>
-                            <th>单价</th>
-                            <th>库存</th>
-                            <th>单位</th>
-                            <th>登记日期</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for p in products %}
-                        <tr>
-                            <td><strong>#{{ p.id }}</strong></td>
-                            <td>{{ p.name }}</td>
-                            <td>
-                                {% if p.category %}
-                                <span class="category-badge">{{ p.category }}</span>
-                                {% else %}-{% endif %}
-                            </td>
-                            <td>{{ p.model or '-' }}</td>
-                            <td class="price-text">¥{{ "%.2f"|format(p.price) }}</td>
-                            <td>
-                                {% if p.stock < 10 %}
-                                <span class="stock-badge stock-low"><i class="bi bi-exclamation-triangle"></i> {{ p.stock }}</span>
-                                {% elif p.stock < 50 %}
-                                <span class="stock-badge stock-medium">{{ p.stock }}</span>
-                                {% else %}
-                                <span class="stock-badge stock-high"><i class="bi bi-check-circle"></i> {{ p.stock }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ p.unit or '-' }}</td>
-                            <td>{{ p.reg_date.strftime('%Y-%m-%d') if p.reg_date else '-' }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary" onclick="editProduct({{ p.id }}, '{{ p.name }}', '{{ p.reg_date }}', '{{ p.category }}', '{{ p.model }}', '{{ p.unit }}', {{ p.price }}, {{ p.stock }})">
-                                    <i class="bi bi-pencil"></i>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>商品名称</th>
+                        <th>品类</th>
+                        <th>型号</th>
+                        <th>单价</th>
+                        <th>库存</th>
+                        <th>单位</th>
+                        <th>登记日期</th>
+                        <th style="width: 100px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td><span style="color: var(--gray-400);">#</span>{{ p.id }}</td>
+                        <td><strong>{{ p.name }}</strong></td>
+                        <td>
+                            {% if p.category %}
+                            <span class="badge badge-soft-primary">{{ p.category }}</span>
+                            {% else %}<span class="text-muted">-</span>{% endif %}
+                        </td>
+                        <td>{{ p.model or '-' }}</td>
+                        <td style="color: var(--success); font-weight: 600;">¥{{ "%.2f"|format(p.price) }}</td>
+                        <td>
+                            {% if p.stock < 10 %}
+                            <span class="badge badge-soft-danger">{{ p.stock }}</span>
+                            {% elif p.stock < 50 %}
+                            <span class="badge badge-soft-warning">{{ p.stock }}</span>
+                            {% else %}
+                            <span class="badge badge-soft-success">{{ p.stock }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ p.unit or '-' }}</td>
+                        <td style="color: var(--gray-500); font-size: 0.8rem;">{{ p.reg_date.strftime('%Y-%m-%d') if p.reg_date else '-' }}</td>
+                        <td>
+                            <button class="btn btn-icon btn-outline-primary btn-sm me-1" onclick="editProduct({{ p.id }}, '{{ p.name }}', '{{ p.reg_date }}', '{{ p.category }}', '{{ p.model }}', '{{ p.unit }}', {{ p.price }}, {{ p.stock }})" title="编辑">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <form method="POST" action="{{ url_for('main.product_delete', id=p.id) }}" style="display: inline;" onsubmit="return confirm('确定删除该商品？')">
+                                <button type="submit" class="btn btn-icon btn-outline-danger btn-sm" title="删除">
+                                    <i class="bi bi-trash"></i>
                                 </button>
-                                <form method="POST" action="{{ url_for('main.product_delete', id=p.id) }}" style="display: inline;" onsubmit="return confirm('确定删除该商品？')">
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -132,9 +83,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTitle">
-                    <i class="bi bi-plus-circle"></i> 添加商品
+                    <i class="bi bi-plus-circle me-2"></i>添加商品
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="{{ url_for('main.product_save') }}">
                 <div class="modal-body">
@@ -142,7 +93,7 @@
                     <div class="row g-3">
                         <div class="col-md-8">
                             <label class="form-label">商品名称 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="name" id="productName" required>
+                            <input type="text" class="form-control" name="name" id="productName" required placeholder="请输入商品名称">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">登记日期</label>
@@ -151,7 +102,7 @@
                         <div class="col-md-6">
                             <label class="form-label">品类</label>
                             <select class="form-select" name="category" id="productCategory">
-                                <option value="">请选择</option>
+                                <option value="">请选择品类</option>
                                 <option value="电子产品">电子产品</option>
                                 <option value="家居用品">家居用品</option>
                                 <option value="服装鞋帽">服装鞋帽</option>
@@ -164,18 +115,18 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">型号</label>
-                            <input type="text" class="form-control" name="model" id="productModel">
+                            <input type="text" class="form-control" name="model" id="productModel" placeholder="请输入型号">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">单价 <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">¥</span>
-                                <input type="number" step="0.01" class="form-control" name="price" id="productPrice" required>
+                                <input type="number" step="0.01" class="form-control" name="price" id="productPrice" required placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">库存 <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="stock" id="productStock" required>
+                            <input type="number" class="form-control" name="stock" id="productStock" required placeholder="0">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">单位</label>
@@ -194,9 +145,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> 保存
+                        <i class="bi bi-check-lg me-1"></i> 保存
                     </button>
                 </div>
             </form>
@@ -207,31 +158,31 @@
 
 {% block extra_js %}
 <script>
-    function clearForm() {
-        document.getElementById('modalTitle').innerHTML = '<i class="bi bi-plus-circle"></i> 添加商品';
-        document.getElementById('productId').value = '';
-        document.getElementById('productName').value = '';
-        document.getElementById('productRegDate').value = '';
-        document.getElementById('productCategory').value = '';
-        document.getElementById('productModel').value = '';
-        document.getElementById('productUnit').value = '';
-        document.getElementById('productPrice').value = '';
-        document.getElementById('productStock').value = '';
-    }
+function clearForm() {
+    document.getElementById('modalTitle').innerHTML = '<i class="bi bi-plus-circle me-2"></i>添加商品';
+    document.getElementById('productId').value = '';
+    document.getElementById('productName').value = '';
+    document.getElementById('productRegDate').value = '';
+    document.getElementById('productCategory').value = '';
+    document.getElementById('productModel').value = '';
+    document.getElementById('productUnit').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productStock').value = '';
+}
+
+function editProduct(id, name, regDate, category, model, unit, price, stock) {
+    document.getElementById('modalTitle').innerHTML = '<i class="bi bi-pencil me-2"></i>编辑商品';
+    document.getElementById('productId').value = id;
+    document.getElementById('productName').value = name;
+    document.getElementById('productRegDate').value = regDate !== 'None' ? regDate : '';
+    document.getElementById('productCategory').value = category !== 'None' ? category : '';
+    document.getElementById('productModel').value = model !== 'None' ? model : '';
+    document.getElementById('productUnit').value = unit !== 'None' ? unit : '';
+    document.getElementById('productPrice').value = price;
+    document.getElementById('productStock').value = stock;
     
-    function editProduct(id, name, regDate, category, model, unit, price, stock) {
-        document.getElementById('modalTitle').innerHTML = '<i class="bi bi-pencil"></i> 编辑商品';
-        document.getElementById('productId').value = id;
-        document.getElementById('productName').value = name;
-        document.getElementById('productRegDate').value = regDate !== 'None' ? regDate : '';
-        document.getElementById('productCategory').value = category !== 'None' ? category : '';
-        document.getElementById('productModel').value = model !== 'None' ? model : '';
-        document.getElementById('productUnit').value = unit !== 'None' ? unit : '';
-        document.getElementById('productPrice').value = price;
-        document.getElementById('productStock').value = stock;
-        
-        var modal = new bootstrap.Modal(document.getElementById('productModal'));
-        modal.show();
-    }
+    var modal = new bootstrap.Modal(document.getElementById('productModal'));
+    modal.show();
+}
 </script>
 {% endblock %}

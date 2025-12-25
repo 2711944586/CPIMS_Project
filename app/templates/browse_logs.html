@@ -1,178 +1,134 @@
 {% extends "base.html" %}
 
-{% block title %}浏览记录 - 商品信息管理系统{% endblock %}
-
-{% block extra_css %}
-<style>
-    .page-header {
-        margin-bottom: 1.5rem;
-    }
-    
-    .search-card {
-        background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    }
-    
-    .platform-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }
-    
-    .summary-card {
-        background: white;
-        border-radius: 16px;
-        padding: 1.2rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        text-align: center;
-    }
-    
-    .summary-value {
-        font-size: 1.8rem;
-        font-weight: 800;
-        margin-bottom: 0.3rem;
-    }
-    
-    .summary-label {
-        color: #64748b;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    
-    .time-text {
-        color: #64748b;
-        font-size: 0.9rem;
-    }
-</style>
-{% endblock %}
+{% block title %}浏览记录 - CPIMS{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- 页面头部 -->
-    <div class="page-header fade-in">
-        <h2 class="page-title">
-            <i class="bi bi-eye"></i> 浏览记录
-        </h2>
-        <p class="text-white mt-2 mb-0" style="opacity: 0.9;">查询用户浏览行为，分析访问数据</p>
+<div class="top-header">
+    <div class="page-title-section">
+        <h1>浏览记录</h1>
+        <p>查询用户浏览行为数据</p>
     </div>
-    
-    <!-- 统计摘要 -->
+</div>
+
+<div class="content-area">
+    <!-- 搜索 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('main.browse_logs') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">用户名</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" name="username" value="{{ username }}" placeholder="输入用户名...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">开始日期</label>
+                        <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">结束日期</label>
+                        <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i> 查询
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 统计 -->
     <div class="row g-3 mb-4">
         <div class="col-md-4">
-            <div class="summary-card fade-in">
-                <div class="summary-value" style="color: #6366f1;">{{ logs|length }}</div>
-                <div class="summary-label">浏览记录数</div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(79,70,229,0.1); color: var(--primary);">
+                    <i class="bi bi-eye"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">浏览记录</div>
+                    <div class="stat-value">{{ logs|length }}</div>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="summary-card fade-in" style="animation-delay: 0.1s;">
-                <div class="summary-value" style="color: #10b981;">{{ logs|groupby('user_id')|list|length }}</div>
-                <div class="summary-label">活跃用户</div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(34,197,94,0.1); color: var(--success);">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">活跃用户</div>
+                    <div class="stat-value">{{ logs|groupby('user_id')|list|length }}</div>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="summary-card fade-in" style="animation-delay: 0.2s;">
-                <div class="summary-value" style="color: #ec4899;">{{ logs|groupby('product_id')|list|length }}</div>
-                <div class="summary-label">浏览商品</div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: var(--warning);">
+                    <i class="bi bi-box"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">浏览商品</div>
+                    <div class="stat-value">{{ logs|groupby('product_id')|list|length }}</div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- 查询表单 -->
-    <div class="search-card fade-in" style="animation-delay: 0.3s;">
-        <form method="GET" action="{{ url_for('main.browse_logs') }}">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">
-                        <i class="bi bi-person"></i> 用户名
-                    </label>
-                    <input type="text" class="form-control" name="username" 
-                           value="{{ username }}" placeholder="输入用户名...">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">
-                        <i class="bi bi-calendar"></i> 开始日期
-                    </label>
-                    <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">
-                        <i class="bi bi-calendar-check"></i> 结束日期
-                    </label>
-                    <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search"></i> 查询
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-    
-    <!-- 查询结果 -->
-    <div class="card fade-in" style="animation-delay: 0.4s;">
-        <div class="card-header">
-            <i class="bi bi-list-check"></i> 浏览记录
-            <span class="badge bg-white text-primary ms-2">{{ logs|length }} 条</span>
+
+    <!-- 表格 -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-check"></i> 浏览明细</span>
+            <span class="badge badge-soft-primary">{{ logs|length }} 条记录</span>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>记录ID</th>
-                            <th>用户名</th>
-                            <th>商品名称</th>
-                            <th>浏览时间</th>
-                            <th>浏览方式</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in logs %}
-                        <tr>
-                            <td><strong>#{{ log.id }}</strong></td>
-                            <td>
-                                <i class="bi bi-person-circle text-primary"></i> 
-                                {{ log.user.username }}
-                            </td>
-                            <td>
-                                <i class="bi bi-box text-success"></i> 
-                                {{ log.product.name }}
-                            </td>
-                            <td class="time-text">
-                                <i class="bi bi-clock"></i> 
-                                {{ log.browse_time.strftime('%Y-%m-%d %H:%M') }}
-                            </td>
-                            <td>
-                                {% if log.platform == 'PC' %}
-                                <span class="platform-badge" style="background: #dbeafe; color: #2563eb;">
-                                    <i class="bi bi-laptop"></i> PC端
-                                </span>
-                                {% elif log.platform == 'APP' %}
-                                <span class="platform-badge" style="background: #f3e8ff; color: #9333ea;">
-                                    <i class="bi bi-phone"></i> APP
-                                </span>
-                                {% elif log.platform == '移动端' %}
-                                <span class="platform-badge" style="background: #dcfce7; color: #16a34a;">
-                                    <i class="bi bi-phone"></i> 移动端
-                                </span>
-                                {% else %}
-                                <span class="platform-badge" style="background: #fef3c7; color: #d97706;">
-                                    <i class="bi bi-grid"></i> {{ log.platform }}
-                                </span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>记录ID</th>
+                        <th>用户</th>
+                        <th>商品名称</th>
+                        <th>浏览时间</th>
+                        <th>访问渠道</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td><span style="color: var(--gray-400);">#</span>{{ log.id }}</td>
+                        <td>
+                            <i class="bi bi-person-circle text-muted me-1"></i>{{ log.user.username }}
+                        </td>
+                        <td><strong>{{ log.product.name }}</strong></td>
+                        <td style="color: var(--gray-500); font-size: 0.85rem;">
+                            <i class="bi bi-clock me-1"></i>{{ log.browse_time.strftime('%Y-%m-%d %H:%M') }}
+                        </td>
+                        <td>
+                            {% if log.platform == 'PC' %}
+                            <span class="badge" style="background: #e8f4fd; color: #1677ff;">
+                                <i class="bi bi-laptop me-1"></i>PC端
+                            </span>
+                            {% elif log.platform == 'APP' %}
+                            <span class="badge" style="background: #f3e8ff; color: #9333ea;">
+                                <i class="bi bi-phone me-1"></i>APP
+                            </span>
+                            {% elif log.platform == '移动端' %}
+                            <span class="badge" style="background: #e6f7e6; color: #52c41a;">
+                                <i class="bi bi-phone me-1"></i>移动端
+                            </span>
+                            {% else %}
+                            <span class="badge badge-soft-warning">
+                                <i class="bi bi-globe me-1"></i>{{ log.platform }}
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
